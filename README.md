@@ -1,116 +1,156 @@
 # Satis
 
-A simple static Composer repository generator.
+Unser [Satis Server][] ist ein geforktes Repository von dem offiziellen [Satis Projekt][]
+Den HTACCESS-Schutz kann man im LastPass finden.
 
-## About
+## Satis Server neu aufsetzen
 
-Satis is a tool that allows PHP developers to create a private package repository for their projects' dependencies. It provides
-increased control over package distribution, improved security, and faster package installations, by creating a static Composer
-registry that can be hosted anywhere (even via Docker, locally).
-
-## Run from source
-
-Satis requires a recent PHP version, it does not run with unsupported PHP versions. Check the `composer.json` file for details.
-
--   Install satis: `composer create-project composer/satis:dev-main`
--   Build a repository: `php bin/satis build <configuration-file> <output-directory>`
-
-Read the more detailed instructions in the [documentation][].
-
-## Run as Docker container
-
-> Note: use `composer/satis` for Docker Hub, `ghcr.io/composer/satis` for GitHub container registry.
-
-Pull the image:
-
-```sh
-docker pull composer/satis
+Um in Zukunft auch das eigene Projekt auf dem aktuellsten Stand zu haben, sollte das [Satis Projekt][]
+geforkt werden.
+```
+git clone [URL of your fork]
 ```
 
-Run the image (with Composer cache from host):
-
-```sh
-docker run --rm --init -it \
-  --user $(id -u):$(id -g) \
-  --volume $(pwd):/build \
-  --volume "${COMPOSER_HOME:-$HOME/.composer}:/composer" \
-  composer/satis build <configuration-file> <output-directory>
+Danach wird das Original Repository als sog. Upstream hinzugefügt.
+```
+git remote add upstream [URL of the original repository]
 ```
 
-If you want to run the image without implicitly running Satis, you have to
-override the entrypoint specified in the `Dockerfile`:
-
-```sh
---entrypoint /bin/sh
+Damit man prüfen kann, ob die richtigen Repositories verknüpft werden kann man folgenden Befehl aufrufen:
+```
+git remote -v
 ```
 
-## Purge
 
-If you choose to archive packages as part of your build, over time you can be
-left with useless files. With the `purge` command, you can delete these files.
+## Satis Server konfigurieren
 
-```sh
-php bin/satis purge <configuration-file> <output-dir>
+Bei einem Provider seines Vertrauens wird eine Subdomain mit gültigem SSL Zertifikat eingerichtet.
+Am besten richtet man auch gleich einen einfachen HTTP-Basic-Auth Verzeichnisschutz mit ".htaccess" an.
+
+Wenn nicht bereits geschehen, erstellt man auf dem Satis Server einen neuen SSH-Key und hinterlegt den öffentlichen 
+Schlüsselteil auf dem Server, z.B. Bitbucket, der die privaten Repositories, die man auf dem Satis Server verknüpfen möchte,
+speichert.
+
+```
+ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
 
-> Note: don't do this unless you are certain your projects no longer reference any of these archives in their `composer.lock` files.
+## Cronjob für Satis Build hinterlegen
+Damit der Satis Server immer die aktuellsten Versionen der Repositories ausliefern kann, sollte der Sync-Prozess mit dem
+Bitbucket Server in regelmäßigen Abständen ausgeführt werden. Am besten legt man dafür ein Shell-Skript an, dass per Cronjob
+getriggert wird.
 
-## Updating
+```
+#!/bin/bash
 
-Updating Satis is as simple as running `git pull && composer install` in the
-Satis directory.
-
-If you are running Satis as a Docker container, simply pull the latest image.
-
-## Contributing
-
-Please note that this project is released with a [Contributor Code of Conduct][].
-By participating in this project you agree to abide by its terms.
-
-Fork the project, create a feature branch, and send us a pull request.
-
-If you introduce a new feature, or fix a bug, please try to include a testcase.
-
-While not required, it is appreciated if your contribution meets our coding standards.
-
-You can check these yourself by running the tools we use:
-
-```bash
-# install tooling & dependencies
-for d in tools/*; do composer --working-dir=$d install; done
-
-# run php-cs-fixer
-tools/php-cs-fixer/vendor/bin/php-cs-fixer fix
-
-# run phpstan
-tools/phpstan/vendor/bin/phpstan
-
-# alternatively, use the shortcuts
-composer phpstan
-composer php-cs-fixer[-fix]
+cd <pfad zum satis server> || exit
+COMPOSER_CACHE_DIR=<pfad zum composer cache> bin/satis build
+exit 0
 ```
 
-## Authors
+## Satis Server konfigurieren
+Grundsätzlich muss man jetzt nur noch in eine "satis.json" alle Repositories angeben, die gesynct werden sollen.
 
-See the list of [contributors][] who participate(d) in this project.
+**Beispiel:**
+```
+{
+    "name": "convis/satis.con-vis.de",
+    "homepage": "https://satis.con-vis.de",
+    "output-dir": "public",
+    "repositories": [
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/package1.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/package2.git" }
+    ],
+    "archive": {
+        "directory": "dist",
+        "skip-dev": true
+    },
+    "require-all": true
+}
+```
 
-## Community Tools
+## Plugin Konfiguration
+Die einzelnen privaten Repositories für die ausgelagerten Plugins, die man wiederverwenden möchte, werden wie folgt per composer.json
+konfiguriert. Die einzelnen Versionen können an den entsprechenden Commits getaggt werden.
 
--   [satisfy][] - Symfony based composer repository manager with a simple web UI.
+> Wichtig ist die Version in der composer.json und der Tag sollten immer gleich sein.
 
-## Examples
+**Beispiel**
+```
+# tag
+v1.1.0
 
--   [eventum/composer] - A simple static set of packages hosted in GitHub Pages
--   [satis.spatie.be] - A brief guide to setting up and securing a Satis repository
+# composer.json
+{
+    "name": "convis/devtools",
+    "description": "Plugin for some DevTools",
+    "version": "1.1.0",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ConVis GmbH"
+        }
+    ],
+    "require": {
+        "shopware/core": "^6.4.0",
+        "shopware/administration": "^6.4.0"
+    },
+    "extra": {
+        "shopware-plugin-class": "ConVis\\DevTools\\ConVisDevTools",
+        "copyright": "(c) by ConVis GmbH",
+        "label": {
+            "de-DE": "Plugin ConVis DevTools",
+            "en-GB": "Plugin ConVis DevTools",
+            "fr-FR": "Plugin ConVis DevTools"
+        },
+        "description": {
+            "de-DE": "Beschreibung für das Plugin ConVis DevTools",
+            "en-GB": "Description for the plugin ConVis DevTools",
+            "fr-FR": "Description for the plugin ConVis DevTools"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "ConVis\\DevTools\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ConVis\\DevTools\\ConVisDevToolsTests\\": "tests/"
+        }
+    },
+    "conflict": {
+        "shopware/storefront": "<6,>=7",
+        "shopware/administration": "<6,>=7"
+    }
+}
+```
 
-## License
+## Client/Projekt konfigurieren
 
-Satis is licensed under the MIT License - see the [LICENSE][] file for details
+Wenn wir jetzt ein Projekt haben, in der wie die privaten Repositories als Abhängigkeit installieren möchten, werden nur
+noch 2 Schritte benötigt
 
-[documentation]: https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md
-[contributor code of conduct]: https://www.contributor-covenant.org/version/2/0/code_of_conduct/
-[contributors]: https://github.com/composer/satis/contributors
-[satisfy]: https://github.com/ludofleury/satisfy
-[license]: https://github.com/composer/satis/blob/main/LICENSE
-[eventum/composer]: https://github.com/eventum/composer
-[satis.spatie.be]: https://alexvanderbist.com/2021/setting-up-and-securing-a-private-composer-repository/
+### HTTP-Basic-Auth in der Git-Konfiguration hinterlegen
+Damit composer sicht mit dem Satis Server verbinden kann, sollte die http-basic Infos in der Git-Konfig hinterlegt sein.
+```
+composer config --global http-basic.satis.con-vis.de <username> <password>
+```
+
+### Composer anpassen
+Einmal wird unter "repositories" der Satis Server verknüpft und anschließend kann wie gewohnt die Abhängigkeit angegeben werden.
+Mittels "composer require" oder manuell als Eintrag in die json-Datei.
+```
+{
+    "repositories": [ { "type": "composer", "url": "http://packages.example.org/" } ],
+    "require": {
+        "company/package": "1.2.0",
+        "company/package2": "1.5.2",
+        "company/package3": "dev-master"
+    }
+}
+```
+
+[satis server]: https://satis.con-vis.de
+[satis projekt]: https://github.com/composer/satis
