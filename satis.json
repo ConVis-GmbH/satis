@@ -4,7 +4,9 @@
     "output-dir": "public",
     "repositories": [
         { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxcoupon.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxcustomformextension.git" },
         { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convisbackendstyle.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/conviscustomcms.git" },
         { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convis-dev-tools.git" }
     ],
     "archive": {
