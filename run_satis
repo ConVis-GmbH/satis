@@ -1,0 +1,4 @@
+#!/bin/sh
+
+COMPOSER_CACHE_DIR=/home/www/p563318/html/.composer /home/www/p563318/html/satis.con-vis.de/bin/satis build
+exit 0;

@@ -3,11 +3,27 @@
     "homepage": "https://satis.con-vis.de",
     "output-dir": "public",
     "repositories": [
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxavailability.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxclassification.git" },
         { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxcoupon.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxcouponmigration.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxcustomcmselements.git" },
         { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxcustomformextension.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxextendcheckout.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxextendswagpaypal.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxredirects.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/asxwebp.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convisaddressvalidation.git" },
         { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convisbackendstyle.git" },
         { "type": "vcs", "url":  "git@bitbucket.org:con-vis/conviscustomcms.git" },
-        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convis-dev-tools.git" }
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/conviscustproductsitemnumberupdater.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convis-dev-tools.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convisevalanchenewsletter.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convisfoundation.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convisproductrequest.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convissalescontextswitcher.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/convisvatvalidator.git" },
+        { "type": "vcs", "url":  "git@bitbucket.org:con-vis/recommendy.git" }
     ],
     "archive": {
         "directory": "dist",
