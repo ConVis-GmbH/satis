@@ -1,23 +1,21 @@
-const Encore = require("@symfony/webpack-encore");
-const ESLintPlugin = require("eslint-webpack-plugin");
-const glob = require("glob");
-const path = require("path");
-const { PurgeCSSPlugin } = require("purgecss-webpack-plugin");
+import Encore from "@symfony/webpack-encore";
+import { PurgeCSSPlugin } from "purgecss-webpack-plugin";
+import { glob } from "glob";
 
 Encore.addEntry("app", "./views/assets/js/app.js")
     .addStyleEntry("style", "./views/assets/css/style.scss")
     .cleanupOutputBeforeBuild()
     .disableSingleRuntimeChunk()
     .enableSassLoader()
-    .addPlugin(new ESLintPlugin())
     .enableSourceMaps(!Encore.isProduction())
     .setOutputPath("views/build/")
     .setPublicPath("/build")
     .addPlugin(
         new PurgeCSSPlugin({
-            paths: glob.sync(`${path.join(__dirname, "views")}/**/*`, {
-                nodir: true,
-            }),
+            paths: () =>
+                glob.sync([`views/*.html.twig`, `views/assets/js/**/*.js`], {
+                    nodir: true,
+                }),
         }),
     );
 
@@ -30,4 +28,4 @@ config.output.environment.arrowFunction = false;
 config.output.environment.const = false;
 config.output.environment.destructuring = false;
 
-module.exports = config;
+export { config as default };
